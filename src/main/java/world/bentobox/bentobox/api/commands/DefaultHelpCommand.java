@@ -1,19 +1,19 @@
 package world.bentobox.bentobox.api.commands;
 
+import net.md_5.bungee.api.ChatColor;
+import org.apache.commons.lang.math.NumberUtils;
+import world.bentobox.bentobox.api.localization.TextVariables;
+import world.bentobox.bentobox.api.user.User;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang.math.NumberUtils;
-
-import world.bentobox.bentobox.api.localization.TextVariables;
-import world.bentobox.bentobox.api.user.User;
-
 /**
  * Adds a default help to every command that will show the usage of the command
  * and the usage of any subcommands that the command has.
- * @author tastybento
  *
+ * @author tastybento
  */
 public class DefaultHelpCommand extends CompositeCommand {
 
