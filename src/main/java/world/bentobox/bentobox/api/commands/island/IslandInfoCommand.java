@@ -33,6 +33,7 @@ public class IslandInfoCommand extends CompositeCommand {
         if (args.size() > 1 || (args.isEmpty() && !user.isPlayer())) {
             // Show help
             showHelp(this, user);
+            System.out.println("test");
             return false;
         }
         // If there are no args, then the player wants info on the island at this location
