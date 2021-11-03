@@ -40,7 +40,7 @@ public abstract class Addon {
     private FileConfiguration config;
     private File dataFolder;
     private File file;
-    private Map<String, AddonRequestHandler> requestHandlers = new HashMap<>();
+    private final Map<String, AddonRequestHandler> requestHandlers = new HashMap<>();
 
     protected Addon() {
         state = State.DISABLED;
@@ -392,6 +392,16 @@ public abstract class Addon {
      */
     public IslandsManager getIslands() {
         return getPlugin().getIslands();
+    }
+    
+    /**
+     * Get Islands Manager
+     * @return Islands manager
+     * @see #getIslands()
+     * @since 1.17.1
+     */
+    public IslandsManager getIslandsManager() {
+        return getPlugin().getIslandsManager();
     }
 
     /**

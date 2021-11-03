@@ -2,7 +2,6 @@ package world.bentobox.bentobox.listeners.flags.protection;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.ArmorStand;
@@ -20,7 +19,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.bukkit.util.BlockIterator;
 
 import world.bentobox.bentobox.api.flags.FlagListener;
 import world.bentobox.bentobox.lists.Flags;
@@ -48,9 +46,8 @@ public class BreakBlocksListener extends FlagListener {
             checkIsland(e, (Player)e.getRemover(), e.getEntity().getLocation(), Flags.BREAK_BLOCKS);
         }
         // Check for projectiles
-        if (e.getRemover() instanceof Projectile) {
+        if (e.getRemover() instanceof Projectile p) {
             // Find out who fired it
-            Projectile p = (Projectile)e.getRemover();
             if (p.getShooter() instanceof Player) {
                 checkIsland(e, (Player)p.getShooter(), e.getEntity().getLocation(), Flags.BREAK_BLOCKS);
             }
@@ -68,21 +65,6 @@ public class BreakBlocksListener extends FlagListener {
         if (!e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
             return;
         }
-
-        // Look along player's sight line to see if any blocks are skulls
-        try {
-            BlockIterator iterator = new BlockIterator(e.getPlayer(), 10);
-            while (iterator.hasNext()) {
-                Block lastBlock = iterator.next();
-                if (lastBlock.getType().toString().endsWith("_SKULL") || (lastBlock.getType().toString().endsWith("_HEAD") && !lastBlock.getType().equals(Material.PISTON_HEAD))) {
-                    checkIsland(e, e.getPlayer(), lastBlock.getLocation(), Flags.BREAK_BLOCKS);
-                    return;
-                }
-            }
-        } catch (Exception ignored) {
-            // We can ignore this exception
-        }
-
         switch (e.getClickedBlock().getType()) {
         case CAKE:
             checkIsland(e, e.getPlayer(), e.getClickedBlock().getLocation(), Flags.BREAK_BLOCKS);
@@ -135,9 +117,8 @@ public class BreakBlocksListener extends FlagListener {
         if (e.getDamager() instanceof Player) {
             // Check the break blocks flag
             notAllowed(e, (Player)e.getDamager(), e.getEntity().getLocation());
-        } else if (e.getDamager() instanceof Projectile) {
+        } else if (e.getDamager() instanceof Projectile p) {
             // Find out who fired the arrow
-            Projectile p = (Projectile) e.getDamager();
             if (p.getShooter() instanceof Player && notAllowed(e, (Player)p.getShooter(), e.getEntity().getLocation())) {
                 e.getEntity().setFireTicks(0);
                 p.setFireTicks(0);
