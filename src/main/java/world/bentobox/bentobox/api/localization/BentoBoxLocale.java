@@ -56,6 +56,17 @@ public class BentoBoxLocale {
         Object obj = config.get(reference);
         if (obj instanceof String) {
             return obj.toString();
+        } else if (obj instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> strings = (List<String>) obj;
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < strings.size(); i++) {
+                builder.append(strings.get(i));
+                if (i + 1 != strings.size()) {
+                    builder.append("\n");
+                }
+            }
+            return builder.toString();
         }
         return reference; // return reference in case nothing has been found
     }

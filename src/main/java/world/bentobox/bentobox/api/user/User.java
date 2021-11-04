@@ -442,7 +442,6 @@ public class User implements MetaDataAble {
 
         if (matcher.find()) {
             String RGBColor = matcher.group();
-            System.out.println(RGBColor);
             net.md_5.bungee.api.ChatColor chatColor = net.md_5.bungee.api.ChatColor.of(RGBColor);
             message = message.replace(RGBColor, "" + chatColor);
         }
