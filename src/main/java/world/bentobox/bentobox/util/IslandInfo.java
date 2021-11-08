@@ -2,9 +2,12 @@ package world.bentobox.bentobox.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 import org.eclipse.jdt.annotation.Nullable;
@@ -105,11 +108,13 @@ public class IslandInfo {
             String total = plugin.getIWM().getResetLimit(world) < 0 ? "Unlimited" : String.valueOf(plugin.getIWM().getResetLimit(world));
             user.sendMessage("commands.admin.info.resets-left", "[number]", resets, "[total]", total);
             // Show team members
+            user.sendMessage("commands.admin.info.resets-left", "[number]", resets, "[total]", total);
+
             showMembers(user);
         }
         Vector location = island.getProtectionCenter().toVector();
         user.sendMessage("commands.admin.info.island-center", TextVariables.XYZ, Util.xyz(location));
-        user.sendMessage("commands.admin.info.protection-range", "[range]", String.valueOf(island.getProtectionRange()));
+        user.sendMessage("commands.admin.info.protection-range", "[range]", String.valueOf(island.getProtectionRange() * 2));
         user.sendMessage("commands.admin.info.protection-coords", "[xz1]", Util.xyz(new Vector(island.getMinProtectedX(), 0, island.getMinProtectedZ())), "[xz2]", Util.xyz(new Vector(island.getMaxProtectedX(), 0, island.getMaxProtectedZ())));
         if (island.isSpawn()) {
             user.sendMessage("commands.admin.info.is-spawn");
@@ -126,15 +131,25 @@ public class IslandInfo {
      * @param user the User who is requesting it
      */
     public void showMembers(User user) {
-        user.sendMessage("commands.admin.info.team-members-title");
-        island.getMembers().forEach((u, i) -> {
-            if (owner.equals(u)) {
-                user.sendMessage("commands.admin.info.team-owner-format", TextVariables.NAME, plugin.getPlayers().getName(u)
-                        , "[rank]", user.getTranslation(plugin.getRanksManager().getRank(i)));
-            } else if (i > RanksManager.VISITOR_RANK){
-                user.sendMessage("commands.admin.info.team-member-format", TextVariables.NAME, plugin.getPlayers().getName(u)
-                        , "[rank]", user.getTranslation(plugin.getRanksManager().getRank(i)));
+        StringBuilder members = new StringBuilder();
+        final List<String> collect = island.getMembers().keySet()
+                .stream()
+                .filter(uuid -> !uuid.equals(owner))
+                .map(Bukkit::getOfflinePlayer)
+                .map(OfflinePlayer::getName)
+                .collect(Collectors.toList());
+
+        if (collect.size() != 0) {
+            for (int i = 0; i < collect.size(); i++) {
+                members.append(collect.get(i));
+                if (i != collect.size() - 1) {
+                    members.append(", ");
+                }
             }
-        });
+        } else {
+            members.append("无");
+        }
+
+        user.sendMessage("commands.admin.info.team-members-title", "[members]", members.toString());
     }
 }

@@ -440,7 +440,7 @@ public class User implements MetaDataAble {
         Pattern pattern = Pattern.compile("#[A-F|\\d]{6}", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(message);
 
-        if (matcher.find()) {
+        while (matcher.find()) {
             String RGBColor = matcher.group();
             net.md_5.bungee.api.ChatColor chatColor = net.md_5.bungee.api.ChatColor.of(RGBColor);
             message = message.replace(RGBColor, "" + chatColor);
