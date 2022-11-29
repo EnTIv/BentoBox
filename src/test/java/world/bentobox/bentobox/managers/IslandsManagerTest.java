@@ -108,6 +108,8 @@ public class IslandsManagerTest {
     @Mock
     private IslandWorldManager iwm;
     @Mock
+    private IslandChunkDeletionManager chunkDeletionManager;
+    @Mock
     private IslandCache islandCache;
     private Optional<Island> optionalIsland;
     @Mock
@@ -158,6 +160,9 @@ public class IslandsManagerTest {
         when(iwm.inWorld(any(Location.class))).thenReturn(true);
         when(plugin.getIWM()).thenReturn(iwm);
 
+        // Chunk deletion manager
+        when(plugin.getIslandChunkDeletionManager()).thenReturn(chunkDeletionManager);
+
         // Settings
         Settings s = mock(Settings.class);
         when(plugin.getSettings()).thenReturn(s);
@@ -191,7 +196,6 @@ public class IslandsManagerTest {
 
         // Player's manager
         when(plugin.getPlayers()).thenReturn(pm);
-        when(pm.getHomeLocations(any(), any())).thenReturn(Collections.emptyMap());
 
         // Scheduler
         BukkitScheduler sch = mock(BukkitScheduler.class);
@@ -726,7 +730,6 @@ public class IslandsManagerTest {
      */
     @Test
     public void testGetSafeHomeLocationNoIsland() {
-        when(pm.getHomeLocation(eq(world), eq(user), eq(0))).thenReturn(null);
         assertNull(im.getSafeHomeLocation(world, user, ""));
         verify(plugin).logWarning(eq("null player has no island in world world!"));
     }

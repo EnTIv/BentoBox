@@ -1452,7 +1452,7 @@ catalog:
       install-now: 今すぐインストール！
     empty-here:
       name: "&bこれはここでは空に見えます..."
-      description: |+
+      description: |
         &cBentoBoxはGitHubに接続できませんでした。
 
         &aBentoBoxでGitHubに接続できるようにする
@@ -1466,7 +1466,7 @@ panel:
       description: "&aCommits：&b [commits]\n"
     empty-here:
       name: "&cこれはここでは空に見えます..."
-      description: |+
+      description: |
         &cBentoBoxは貢献者を収集できませんでした
         このアドオン用。
 
@@ -1476,7 +1476,7 @@ panel:
 successfully-loaded: |-
   &6  ____             _        ____
   &6 |  _ \           | |      |  _ \             &7by &atastybento &7and &aPoslovitch
-  &6 | |_) | ___ _ __ | |_ ___ | |_) | _____  __  &72017 - 2020
+  &6 | |_) | ___ _ __ | |_ ___ | |_) | _____  __  &72017 - 2022
   &6 |  _ < / _ \ '_ \| __/ _ \|  _ < / _ \ \/ /
   &6 | |_) |  __/ | | | || (_) | |_) | (_) >  <   &bv&e[version]
   &6 |____/ \___|_| |_|\__\___/|____/ \___/_/\_\  &8Loaded in &e[time]&8ms.

@@ -2,6 +2,7 @@ package world.bentobox.bentobox.listeners.flags.clicklisteners;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -43,7 +44,8 @@ public class CommandRankClickListener implements ClickHandler {
         }
 
         // Check if has permission
-        String prefix = plugin.getIWM().getPermissionPrefix(Util.getWorld(panel.getWorld().orElse(user.getWorld())));
+        World w = Objects.requireNonNull(Util.getWorld(panel.getWorld().orElse(user.getWorld())));
+        String prefix = plugin.getIWM().getPermissionPrefix(w);
         String reqPerm = prefix + "settings." + Flags.COMMAND_RANKS.getID();
         String allPerms = prefix + "settings.*";
         if (!user.hasPermission(reqPerm) && !user.hasPermission(allPerms)
@@ -55,8 +57,11 @@ public class CommandRankClickListener implements ClickHandler {
 
         // Get the user's island
         Island island = plugin.getIslands().getIsland(panel.getWorld().orElse(user.getWorld()), user.getUniqueId());
-        if (island == null || !island.getOwner().equals(user.getUniqueId())) {
-            user.sendMessage("general.errors.not-owner");
+        if (island == null || island.getOwner() == null || !island.isAllowed(user, Flags.CHANGE_SETTINGS)) {
+            user.sendMessage("general.errors.insufficient-rank",
+                TextVariables.RANK,
+                user.getTranslation(plugin.getRanksManager().getRank(Objects.requireNonNull(island).getRank(user))));
+
             user.getPlayer().playSound(user.getLocation(), Sound.BLOCK_METAL_HIT, 1F, 1F);
             return true;
         }

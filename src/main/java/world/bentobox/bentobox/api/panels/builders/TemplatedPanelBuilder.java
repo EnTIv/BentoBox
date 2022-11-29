@@ -7,11 +7,12 @@
 package world.bentobox.bentobox.api.panels.builders;
 
 
-import org.bukkit.World;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
+
+import org.bukkit.World;
+import org.eclipse.jdt.annotation.NonNull;
 
 import world.bentobox.bentobox.api.panels.PanelItem;
 import world.bentobox.bentobox.api.panels.PanelListener;
@@ -47,6 +48,23 @@ public class TemplatedPanelBuilder
     }
 
 
+
+    /**
+     * Adds the template that must be loaded for Template panel builder.
+     *
+     * @param panelName the gui name
+     * @param templateName the name of the file
+     * @param dataFolder the data folder
+     * @return the template panel builder
+     * @since 1.20.0
+     */
+    public TemplatedPanelBuilder template(String panelName, String templateName, File dataFolder)
+    {
+        this.panelTemplate = TemplateReader.readTemplatePanel(panelName, templateName, dataFolder);
+        return this;
+    }
+
+
     /**
      * Adds the user for template panel builder.
      *
@@ -69,6 +87,24 @@ public class TemplatedPanelBuilder
     public TemplatedPanelBuilder world(World world)
     {
         this.world = world;
+        return this;
+    }
+
+
+    /**
+     * Parameters for title of templated panel.
+     *
+     * @param parameters the parameters for title
+     * @return the templated panel builder
+     * @since 1.20.0
+     */
+    public TemplatedPanelBuilder parameters(@NonNull String... parameters)
+    {
+        if (parameters.length > 0)
+        {
+            this.parameters.addAll(Arrays.stream(parameters).toList());
+        }
+
         return this;
     }
 
@@ -150,6 +186,17 @@ public class TemplatedPanelBuilder
 
 
     /**
+     * Get title parameters for panel title.
+     *
+     * @return the list of parameters for title.
+     */
+    public List<String> getParameters()
+    {
+        return this.parameters;
+    }
+
+
+    /**
      * Gets listener.
      *
      * @return the listener
@@ -195,6 +242,11 @@ public class TemplatedPanelBuilder
      * Panel Listener
      */
     private PanelListener listener;
+
+    /**
+     * The list of parameters for title object.
+     */
+    private final List<String> parameters = new ArrayList<>(0);
 
     /**
      * Map that links objects with their panel item creators.

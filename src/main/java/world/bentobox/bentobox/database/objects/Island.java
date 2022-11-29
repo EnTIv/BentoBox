@@ -1,6 +1,7 @@
 package world.bentobox.bentobox.database.objects;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
@@ -32,7 +32,6 @@ import com.google.gson.annotations.Expose;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.commands.CompositeCommand;
 import world.bentobox.bentobox.api.configuration.WorldSettings;
-import world.bentobox.bentobox.api.events.island.IslandEvent;
 import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.api.logs.LogEntry;
 import world.bentobox.bentobox.api.metadata.MetaDataAble;
@@ -43,9 +42,7 @@ import world.bentobox.bentobox.database.objects.adapters.FlagSerializer;
 import world.bentobox.bentobox.database.objects.adapters.FlagSerializer3;
 import world.bentobox.bentobox.database.objects.adapters.LogEntryListAdapter;
 import world.bentobox.bentobox.lists.Flags;
-import world.bentobox.bentobox.managers.IslandWorldManager;
 import world.bentobox.bentobox.managers.RanksManager;
-import world.bentobox.bentobox.util.IslandInfo;
 import world.bentobox.bentobox.util.Pair;
 import world.bentobox.bentobox.util.Util;
 
@@ -76,7 +73,6 @@ public class Island implements DataObject, MetaDataAble {
     //// Island ////
     // The center of the island space
     @Expose
-    @Nullable
     private Location center;
 
     /**
@@ -94,6 +90,13 @@ public class Island implements DataObject, MetaDataAble {
     // Protection size
     @Expose
     private int protectionRange;
+
+    /**
+     * Bonuses to protection range
+     * @since 1.20.0
+     */
+    @Expose
+    private List<BonusRangeRecord> bonusRanges = new ArrayList<>();
 
     // Maximum ever protection range - used in island deletion
     @Expose
@@ -165,8 +168,6 @@ public class Island implements DataObject, MetaDataAble {
     private List<LogEntry> history = new LinkedList<>();
 
     @Expose
-    private int levelHandicap;
-    @Expose
     private Map<Environment, Location> spawnPoint = new EnumMap<>(Environment.class);
 
     /**
@@ -197,7 +198,7 @@ public class Island implements DataObject, MetaDataAble {
     private Boolean reserved = null;
 
     /**
-     * A place to store meta data for this island.
+     * A place to store metadata for this island.
      * @since 1.15.4
      */
     @Expose
@@ -258,7 +259,6 @@ public class Island implements DataObject, MetaDataAble {
         this.gameMode = island.getGameMode();
         this.homes = new HashMap<>(island.getHomes());
         this.history.addAll(island.getHistory());
-        this.levelHandicap = island.getLevelHandicap();
         this.location = island.getProtectionCenter();
         this.maxEverProtectionRange = island.getMaxEverProtectionRange();
         this.maxHomes = island.getMaxHomes();
@@ -279,6 +279,7 @@ public class Island implements DataObject, MetaDataAble {
         this.uniqueId = island.getUniqueId();
         this.updatedDate = island.getUpdatedDate();
         this.world = island.getWorld();
+        this.bonusRanges.addAll(island.getBonusRanges());
         this.setChanged();
     }
 
@@ -299,7 +300,7 @@ public class Island implements DataObject, MetaDataAble {
      * Bans the target player from this Island.
      * If the player is a member, coop or trustee, they will be removed from those lists.
      * <br/>
-     * Calling this method won't call the {@link world.bentobox.bentobox.api.events.island.IslandEvent.IslandBanEvent}.
+     * Calling this method won't call the {@link world.bentobox.bentobox.api.events.island.IslandBanEvent}.
      * @param issuer UUID of the issuer, may be null.
      *               Whenever possible, one should be provided.
      * @param target UUID of the target, must be provided.
@@ -346,9 +347,9 @@ public class Island implements DataObject, MetaDataAble {
      * Returns a clone of the location of the center of this island.
      * @return clone of the center Location
      */
-    @Nullable
+    @NonNull
     public Location getCenter(){
-        return center == null ? null : center.clone();
+        return Objects.requireNonNull(center, "Island getCenter requires a non-null center").clone();
     }
 
     /**
@@ -359,7 +360,7 @@ public class Island implements DataObject, MetaDataAble {
     }
 
     /**
-     * Gets the Island Guard flag's setting. If this is a protection flag, the this will be the
+     * Gets the Island Guard flag's setting. If this is a protection flag, then this will be the
      * rank needed to bypass this flag. If it is a Settings flag, any non-zero value means the
      * setting is allowed.
      * @param flag - flag
@@ -374,13 +375,6 @@ public class Island implements DataObject, MetaDataAble {
      */
     public Map<Flag, Integer> getFlags() {
         return flags;
-    }
-
-    /**
-     * @return the levelHandicap
-     */
-    public int getLevelHandicap() {
-        return levelHandicap;
     }
 
     /**
@@ -439,41 +433,41 @@ public class Island implements DataObject, MetaDataAble {
     }
 
     /**
-     * Get the minimum protected X block coord based on the island location.
+     * Get the minimum protected X block coordinate based on the island location.
      * It will never be less than {@link #getMinX()}
      * @return the minProtectedX
      */
     public int getMinProtectedX() {
-        return getProtectionCenter() == null ? 0 : Math.max(getMinX(), getProtectionCenter().getBlockX() - protectionRange);
+        return Math.max(getMinX(), getProtectionCenter().getBlockX() - protectionRange);
     }
 
     /**
-     * Get the maximum protected X block coord based on the island location.
+     * Get the maximum protected X block coordinate based on the island location.
      * It will never be more than {@link #getMaxX()}
      * @return the maxProtectedX
      * @since 1.5.2
      */
     public int getMaxProtectedX() {
-        return getProtectionCenter() == null ? 0 : Math.min(getMaxX(), getProtectionCenter().getBlockX() + protectionRange);
+        return Math.min(getMaxX(), getProtectionCenter().getBlockX() + protectionRange);
     }
 
     /**
-     * Get the minimum protected Z block coord based on the island location.
+     * Get the minimum protected Z block coordinate based on the island location.
      * It will never be less than {@link #getMinZ()}
      * @return the minProtectedZ
      */
     public int getMinProtectedZ() {
-        return getProtectionCenter() == null ? 0 : Math.max(getMinZ(), getProtectionCenter().getBlockZ() - protectionRange);
+        return Math.max(getMinZ(), getProtectionCenter().getBlockZ() - protectionRange);
     }
 
     /**
-     * Get the maximum protected Z block coord based on the island location.
+     * Get the maximum protected Z block coordinate based on the island location.
      * It will never be more than {@link #getMinZ()}
      * @return the maxProtectedZ
      * @since 1.5.2
      */
     public int getMaxProtectedZ() {
-        return getProtectionCenter() == null ? 0 : Math.min(getMaxZ(), getProtectionCenter().getBlockZ() + protectionRange);
+        return Math.min(getMaxZ(), getProtectionCenter().getBlockZ() + protectionRange);
     }
 
     /**
@@ -548,12 +542,22 @@ public class Island implements DataObject, MetaDataAble {
     }
 
     /**
-     * Returns the protection range of this Island.
+     * Returns the protection range of this Island plus any bonuses. Will not be greater than getRange().
      * This represents half of the length of the side of a theoretical square around the island center inside which flags are enforced.
      * @return the protection range of this island, strictly positive integer.
      * @see #getRange()
      */
     public int getProtectionRange() {
+        return Math.min(this.getRange(), getRawProtectionRange() + this.getBonusRanges().stream().mapToInt(BonusRangeRecord::getRange).sum());
+    }
+
+    /**
+     * Returns the protection range of this Island without any bonuses
+     * This represents half of the length of the side of a theoretical square around the island center inside which flags are enforced.
+     * @return the protection range of this island, strictly positive integer.
+     * @since 1.20.0
+     */
+    public int getRawProtectionRange() {
         return protectionRange;
     }
 
@@ -561,14 +565,26 @@ public class Island implements DataObject, MetaDataAble {
      * @return the maxEverProtectionRange or the protection range, whichever is larger
      */
     public int getMaxEverProtectionRange() {
-        return Math.max(protectionRange, maxEverProtectionRange);
+        if (maxEverProtectionRange > this.getRange()) {
+            maxEverProtectionRange = this.getRange();
+            setChanged();
+        }
+        return Math.max(this.getProtectionRange(), maxEverProtectionRange);
     }
 
     /**
+     * Sets the maximum protection range. This can be used to optimize
+     * island deletion. Setting this values to a lower value than the current value
+     * will have no effect.
      * @param maxEverProtectionRange the maxEverProtectionRange to set
      */
     public void setMaxEverProtectionRange(int maxEverProtectionRange) {
-        this.maxEverProtectionRange = maxEverProtectionRange;
+        if (maxEverProtectionRange > this.maxEverProtectionRange) {
+            this.maxEverProtectionRange = maxEverProtectionRange;
+        }
+        if (maxEverProtectionRange > this.range) {
+            this.maxEverProtectionRange = this.range;
+        }
         setChanged();
     }
 
@@ -609,7 +625,7 @@ public class Island implements DataObject, MetaDataAble {
     }
 
     @Override
-    public String getUniqueId() {
+    public @NonNull String getUniqueId() {
         return uniqueId;
     }
 
@@ -682,7 +698,7 @@ public class Island implements DataObject, MetaDataAble {
      * @since 1.5.2
      */
     public BoundingBox getBoundingBox() {
-        return new BoundingBox(getMinX(), 0.0D, getMinZ(), getMaxX()-1.0D, world.getMaxHeight(), getMaxZ()-1.0D);
+        return new BoundingBox(getMinX(), world.getMinHeight(), getMinZ(), getMaxX(), world.getMaxHeight(), getMaxZ());
     }
 
     /**
@@ -803,10 +819,8 @@ public class Island implements DataObject, MetaDataAble {
     /**
      * @param center the center to set
      */
-    public void setCenter(@Nullable Location center) {
-        if (center != null) {
-            this.world = center.getWorld();
-        }
+    public void setCenter(@NonNull Location center) {
+        this.world = center.getWorld();
         this.center = center;
         setChanged();
     }
@@ -866,14 +880,6 @@ public class Island implements DataObject, MetaDataAble {
         plugin.getFlagsManager().getFlags().stream().filter(f -> f.getType().equals(Flag.Type.SETTING))
         .forEach(f -> result.put(f, plugin.getIWM().getDefaultIslandSettings(world).getOrDefault(f, f.getDefaultRank())));
         this.setFlags(result);
-        setChanged();
-    }
-
-    /**
-     * @param levelHandicap the levelHandicap to set
-     */
-    public void setLevelHandicap(int levelHandicap) {
-        this.levelHandicap = levelHandicap;
         setChanged();
     }
 
@@ -989,7 +995,7 @@ public class Island implements DataObject, MetaDataAble {
 
     /**
      * Sets player's rank to an arbitrary rank value.
-     * Calling this method won't call the {@link IslandEvent.IslandRankChangeEvent}.
+     * Calling this method won't call the {@link world.bentobox.bentobox.api.events.island.IslandRankChangeEvent}.
      * @param uuid UUID of the player
      * @param rank rank value
      * @since 1.1
@@ -1014,7 +1020,7 @@ public class Island implements DataObject, MetaDataAble {
      * Sets whether this island is a spawn or not.
      * <br/>
      * If {@code true}, the members and the owner will be removed from this island.
-     * The flags will also be resetted to default values.
+     * The flags will also be reset to default values.
      * @param isSpawn {@code true} if the island is a spawn, {@code false} otherwise.
      */
     public void setSpawn(boolean isSpawn){
@@ -1071,27 +1077,6 @@ public class Island implements DataObject, MetaDataAble {
     public void setWorld(World world) {
         this.world = world;
         setChanged();
-    }
-
-    /**
-     * Shows info of this island to this user.
-     * @param user the User who is requesting it
-     * @return always true
-     * @deprecated Use {@link IslandInfo#showInfo(User) instead}
-     */
-    @Deprecated
-    public boolean showInfo(User user) {
-        return new IslandInfo(this).showInfo(user);
-    }
-
-    /**
-     * Shows the members of this island to this user.
-     * @param user the User who is requesting it
-     * @deprecated Use {@link IslandInfo#showMembers(User) instead}
-     */
-    @Deprecated
-    public void showMembers(User user) {
-        new IslandInfo(this).showMembers(user);
     }
 
     /**
@@ -1253,11 +1238,9 @@ public class Island implements DataObject, MetaDataAble {
      * @return {@code true} if this island has its nether island generated, {@code false} otherwise.
      * @since 1.5.0
      */
-    public boolean hasNetherIsland(){
-        IslandWorldManager iwm = BentoBox.getInstance().getIWM();
-        return iwm.isNetherGenerate(getWorld()) && iwm.isNetherIslands(getWorld()) &&
-                iwm.getNetherWorld(getWorld()) != null &&
-                !getCenter().toVector().toLocation(iwm.getNetherWorld(getWorld())).getBlock().getType().equals(Material.AIR);
+    public boolean hasNetherIsland() {
+        World nether = BentoBox.getInstance().getIWM().getNetherWorld(getWorld());
+        return nether != null && !getCenter().toVector().toLocation(nether).getBlock().getType().isAir();
     }
 
     /**
@@ -1265,11 +1248,9 @@ public class Island implements DataObject, MetaDataAble {
      * @return {@code true} if this island has its end island generated, {@code false} otherwise.
      * @since 1.5.0
      */
-    public boolean hasEndIsland(){
-        IslandWorldManager iwm = BentoBox.getInstance().getIWM();
-        return iwm.isEndGenerate(getWorld()) && iwm.isEndIslands(getWorld()) &&
-                iwm.getEndWorld(getWorld()) != null &&
-                !getCenter().toVector().toLocation(iwm.getEndWorld(getWorld())).getBlock().getType().equals(Material.AIR);
+    public boolean hasEndIsland() {
+        World end = BentoBox.getInstance().getIWM().getEndWorld(getWorld());
+        return end != null && !getCenter().toVector().toLocation(end).getBlock().getType().isAir();
     }
 
 
@@ -1331,10 +1312,31 @@ public class Island implements DataObject, MetaDataAble {
      * Get the rank required to run command on this island.
      * The command must have been registered with a rank.
      * @param command - the string given by {@link CompositeCommand#getUsage()}
-     * @return Rank value required, or if command is not set {@link RanksManager#OWNER_RANK}
+     * @return Rank value required, or if command is not set {@link CompositeCommand#getDefaultCommandRank()}
      */
     public int getRankCommand(String command) {
-        return commandRanks == null ? RanksManager.OWNER_RANK : commandRanks.getOrDefault(command, RanksManager.OWNER_RANK);
+
+        if (this.commandRanks == null) {
+            this.commandRanks = new HashMap<>();
+        }
+
+        // Return or calculate default rank for a command.
+        return this.commandRanks.computeIfAbsent(command, key -> {
+
+            // Need to find default value for the command.
+            String[] labels = key.replaceFirst("/", "").split(" ");
+
+            // Get first command label.
+            CompositeCommand compositeCommand = this.getPlugin().getCommandsManager().getCommand(labels[0]);
+
+            for (int i = 1; i < labels.length && compositeCommand != null; i++)
+            {
+                compositeCommand = compositeCommand.getSubCommand(labels[i]).orElse(null);
+            }
+
+            // Return default command rank or owner rank, if command does not exist.
+            return compositeCommand == null ? RanksManager.OWNER_RANK : compositeCommand.getDefaultCommandRank();
+        });
     }
 
     /**
@@ -1397,7 +1399,7 @@ public class Island implements DataObject, MetaDataAble {
     }
 
     /**
-     * Indicates the class has been changed
+     * Indicates the fields have been changed. Used to optimize saving on shutdown.
      */
     public void setChanged() {
         this.changed = true;
@@ -1417,7 +1419,7 @@ public class Island implements DataObject, MetaDataAble {
      * @return a clone of the protection center location
      * @since 1.16.0
      */
-    @Nullable
+    @NonNull
     public Location getProtectionCenter() {
         return location == null ? getCenter() : location.clone();
     }
@@ -1488,6 +1490,16 @@ public class Island implements DataObject, MetaDataAble {
     }
 
     /**
+     * Remove all homes from this island except the default home
+     * @return true if any non-default homes removed
+     * @since 1.20.0
+     */
+    public boolean removeHomes() {
+        setChanged();
+        return getHomes().keySet().removeIf(k -> !k.isEmpty());
+    }
+
+    /**
      * Rename a home
      * @param oldName - old name of home
      * @param newName - new name of home
@@ -1504,6 +1516,8 @@ public class Island implements DataObject, MetaDataAble {
     }
 
     /**
+     * Get the max homes. You shouldn't access this directly.
+     * Use {@link world.bentobox.bentobox.managers.IslandsManager#getMaxHomes(Island)}
      * @return the maxHomes. If null, then the world default should be used.
      * @since 1.16.0
      */
@@ -1514,6 +1528,8 @@ public class Island implements DataObject, MetaDataAble {
 
     /**
      * @param maxHomes the maxHomes to set. If null then the world default will be used.
+     * You shouldn't access this directly.
+     * Use {@link world.bentobox.bentobox.managers.IslandsManager#setMaxHomes(Island, Integer)}
      * @since 1.16.0
      */
     public void setMaxHomes(@Nullable Integer maxHomes) {
@@ -1563,6 +1579,73 @@ public class Island implements DataObject, MetaDataAble {
         getMaxMembers().put(rank, maxMembers);
     }
 
+
+    /**
+     * @return the bonusRanges
+     */
+    public List<BonusRangeRecord> getBonusRanges() {
+        if (bonusRanges == null) {
+            this.setBonusRanges(new ArrayList<>());
+        }
+        return bonusRanges;
+    }
+
+    /**
+     * @param bonusRanges the bonusRanges to set
+     */
+    public void setBonusRanges(List<BonusRangeRecord> bonusRanges) {
+        this.bonusRanges = bonusRanges;
+        setChanged();
+    }
+
+    /**
+     * Get the bonus range provided by all settings of the range giver
+     * @param id an id to identify this bonus
+     * @return bonus range, or 0 if unknown
+     */
+    public int getBonusRange(String id) {
+        return this.getBonusRanges().stream().filter(r -> r.getUniqueId().equals(id)).mapToInt(BonusRangeRecord::getRange).sum();
+    }
+
+    /**
+     * Get the BonusRangeRecord for uniqueId
+     * @param uniqueId a unique id to identify this bonus
+     * @return optional BonusRangeRecord
+     */
+    public Optional<BonusRangeRecord> getBonusRangeRecord(String uniqueId) {
+        return this.getBonusRanges().stream().filter(r -> r.getUniqueId().equals(uniqueId)).findFirst();
+    }
+
+    /**
+     * Add a bonus range amount to the island for this addon or plugin.
+     * Note, this will not replace any range set already with the same id
+     * @param id an id to identify this bonus
+     * @param range range to add to the island protected range
+     * @param message the reference key to a locale message related to this bonus. May be blank.
+     */
+    public void addBonusRange(String id, int range, String message) {
+        this.getBonusRanges().add(new BonusRangeRecord(id, range, message));
+        setMaxEverProtectionRange(this.getProtectionRange());
+        setChanged();
+    }
+
+    /**
+     * Clear the bonus ranges for a unique ID
+     * @param id id to identify this bonus
+     */
+    public void clearBonusRange(String id) {
+        this.getBonusRanges().removeIf(r -> r.getUniqueId().equals(id));
+        setChanged();
+    }
+
+    /**
+     * Clear all bonus ranges for this island
+     */
+    public void clearAllBonusRanges() {
+        this.getBonusRanges().clear();
+        setChanged();
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -1574,10 +1657,12 @@ public class Island implements DataObject, MetaDataAble {
                 + ", name=" + name + ", createdDate=" + createdDate + ", updatedDate=" + updatedDate + ", owner="
                 + owner + ", members=" + members + ", maxMembers=" + maxMembers + ", spawn=" + spawn
                 + ", purgeProtected=" + purgeProtected + ", flags=" + flags + ", history=" + history
-                + ", levelHandicap=" + levelHandicap + ", spawnPoint=" + spawnPoint + ", doNotLoad=" + doNotLoad
+                + ", spawnPoint=" + spawnPoint + ", doNotLoad=" + doNotLoad
                 + ", cooldowns=" + cooldowns + ", commandRanks=" + commandRanks + ", reserved=" + reserved
                 + ", metaData=" + metaData + ", homes=" + homes + ", maxHomes=" + maxHomes + "]";
     }
+
+
 
 
 

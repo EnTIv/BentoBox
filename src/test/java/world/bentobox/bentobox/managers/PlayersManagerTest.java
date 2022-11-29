@@ -2,7 +2,6 @@ package world.bentobox.bentobox.managers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -148,9 +147,17 @@ public class PlayersManagerTest {
         when(nether.getSpawnLocation()).thenReturn(netherSpawn);
         when(iwm.getNetherSpawnRadius(Mockito.any())).thenReturn(100);
 
+        // UUID
+        uuid = UUID.randomUUID();
+        notUUID = UUID.randomUUID();
+        while(notUUID.equals(uuid)) {
+            notUUID = UUID.randomUUID();
+        }
+
         // Player
         when(p.getEnderChest()).thenReturn(inv);
         when(p.getInventory()).thenReturn(playerInv);
+        when(p.getUniqueId()).thenReturn(uuid);
         AttributeInstance at = mock(AttributeInstance.class);
         when(at.getValue()).thenReturn(20D);
         when(p.getAttribute(Attribute.GENERIC_MAX_HEALTH)).thenReturn(at);
@@ -158,15 +165,11 @@ public class PlayersManagerTest {
         // Sometimes use Mockito.withSettings().verboseLogging()
         user = mock(User.class);
         when(user.isOp()).thenReturn(false);
-        uuid = UUID.randomUUID();
-        notUUID = UUID.randomUUID();
-        while(notUUID.equals(uuid)) {
-            notUUID = UUID.randomUUID();
-        }
         when(user.getUniqueId()).thenReturn(uuid);
         when(user.getPlayer()).thenReturn(p);
         when(user.getName()).thenReturn("tastybento");
         when(user.isOnline()).thenReturn(true);
+        when(user.isPlayer()).thenReturn(true);
         User.setPlugin(plugin);
 
 
@@ -314,43 +317,6 @@ public class PlayersManagerTest {
         assertFalse(pm.isKnown(null));
         assertTrue(pm.isKnown(uuid));
         assertTrue(pm.isKnown(notUUID));
-    }
-
-    /**
-     * Test method for {@link world.bentobox.bentobox.managers.PlayersManager#setHomeLocation(User, org.bukkit.Location, int)}.
-     */
-    @Test
-    public void testSetAndGetHomeLocationUserLocationInt() {
-        Location l = mock(Location.class);
-        when(l.getWorld()).thenReturn(world);
-        Location l2 = mock(Location.class);
-        when(l2.getWorld()).thenReturn(nether);
-        Location l3 = mock(Location.class);
-        when(l3.getWorld()).thenReturn(end);
-
-        pm.setHomeLocation(uuid, l, 1);
-        pm.setHomeLocation(uuid, l2, 0);
-        pm.setHomeLocation(uuid, l3, 10);
-        assertEquals(l, pm.getHomeLocation(world, uuid));
-        assertEquals(l2, pm.getHomeLocation(world, uuid, 0));
-        assertEquals(l3, pm.getHomeLocation(world, uuid, 10));
-        assertNotEquals(l, pm.getHomeLocation(world, uuid, 20));
-    }
-
-    @Test
-    public void testClearHomeLocations() {
-        Location l = mock(Location.class);
-        when(l.getWorld()).thenReturn(world);
-        Location l2 = mock(Location.class);
-        when(l2.getWorld()).thenReturn(nether);
-        Location l3 = mock(Location.class);
-        when(l3.getWorld()).thenReturn(end);
-        pm.setHomeLocation(uuid, l, 1);
-        pm.setHomeLocation(uuid, l2, 0);
-        pm.setHomeLocation(uuid, l3, 10);
-        assertFalse(pm.getHomeLocations(world, uuid).isEmpty());
-        pm.clearHomeLocations(world, uuid);
-        assertTrue(pm.getHomeLocations(world, uuid).isEmpty());
     }
 
     /**

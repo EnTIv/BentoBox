@@ -3,6 +3,7 @@ package world.bentobox.bentobox.api.events.flags;
 import java.util.UUID;
 
 import org.bukkit.event.HandlerList;
+import org.eclipse.jdt.annotation.NonNull;
 
 import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.database.objects.Island;
@@ -18,7 +19,7 @@ public class FlagProtectionChangeEvent extends FlagChangeEvent {
     private static final HandlerList handlers = new HandlerList();
 
     @Override
-    public HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return getHandlerList();
     }
 

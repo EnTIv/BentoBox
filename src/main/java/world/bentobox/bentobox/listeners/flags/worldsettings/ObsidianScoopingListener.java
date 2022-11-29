@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import world.bentobox.bentobox.BentoBox;
@@ -33,10 +34,18 @@ public class ObsidianScoopingListener extends FlagListener {
      * Enables changing of obsidian back into lava
      *
      * @param e event
-     * @return false if obsidian not scooped, true if scooped
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public boolean onPlayerInteract(final PlayerInteractEvent e) {
+    public void onPlayerInteractEvent(final PlayerInteractEvent e) {
+        onPlayerInteract(e);
+    }
+    /**
+     * Enables changing of obsidian back into lava
+     *
+     * @param e event
+     * @return false if obsidian not scooped, true if scooped
+     */
+    boolean onPlayerInteract(final PlayerInteractEvent e) {
         if (!getIWM().inWorld(e.getPlayer().getLocation())
                 || !Flags.OBSIDIAN_SCOOPING.isSetForWorld(e.getPlayer().getWorld())
                 || !e.getPlayer().getGameMode().equals(GameMode.SURVIVAL)
@@ -46,6 +55,16 @@ public class ObsidianScoopingListener extends FlagListener {
                 || e.getClickedBlock().getRelative(e.getBlockFace()).getType().equals(Material.WATER)) {
             return false;
         }
+
+        if (Material.BUCKET.equals(e.getPlayer().getInventory().getItemInOffHand().getType()) &&
+            Material.BUCKET.equals(e.getPlayer().getInventory().getItemInMainHand().getType()) &&
+            EquipmentSlot.OFF_HAND.equals(e.getHand()))
+        {
+            // If player is holding bucket in both hands, then allow to interact only with main hand.
+            // Prevents lava duplication glitch.
+            return false;
+        }
+
         return lookForLava(e);
     }
 

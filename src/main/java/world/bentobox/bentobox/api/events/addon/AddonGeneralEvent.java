@@ -3,6 +3,7 @@ package world.bentobox.bentobox.api.events.addon;
 import java.util.Map;
 
 import org.bukkit.event.HandlerList;
+import org.eclipse.jdt.annotation.NonNull;
 
 import world.bentobox.bentobox.api.addons.Addon;
 
@@ -16,7 +17,7 @@ public class AddonGeneralEvent extends AddonBaseEvent {
     private static final HandlerList handlers = new HandlerList();
 
     @Override
-    public HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return getHandlerList();
     }
 

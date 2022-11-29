@@ -68,7 +68,7 @@
         <powermock.version>2.0.9</powermock.version>
         <mongodb.version>3.12.8</mongodb.version>
         <!-- More visible way to change dependency versions -->
-        <spigot.version>1.17-R0.1-SNAPSHOT</spigot.version>
+        <spigot.version>1.18-R0.1-SNAPSHOT</spigot.version>
         <!-- Might differ from the last Spigot release for short periods 
             of time -->
         <paper.version>1.16.5-R0.1-SNAPSHOT</paper.version>
@@ -83,7 +83,9 @@
         <!-- Do not change unless you want different name for local builds. -->
         <build.number>-LOCAL</build.number>
         <!-- This allows to change between versions. -->
-        <build.version>1.17.3</build.version>
+        <build.version>1.20.1</build.version>
+        <sonar.organization>bentobox-world</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <!-- Profiles will allow to automatically change build version. -->
@@ -170,7 +172,10 @@
             <id>maven-snapshots</id>
             <url>https://repository.apache.org/content/repositories/snapshots/</url>
         </repository>
-
+        <repository>
+            <id>minecraft-repo</id>
+            <url>https://libraries.minecraft.net/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -188,11 +193,11 @@
             <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Spigot NMS. Used for Head Getter and chunk deletion. -->
+        <!-- AuthLib. Used for Head Getter. -->
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>${spigot.version}</version>
+            <groupId>com.mojang</groupId>
+            <artifactId>authlib</artifactId>
+            <version>3.2.38</version>
             <scope>provided</scope>
         </dependency>
         <!-- Metrics -->
@@ -265,6 +270,11 @@
             <artifactId>GitHubWebAPI4Java</artifactId>
             <version>${githubapi.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.Marcono1234</groupId>
+            <artifactId>gson-record-type-adapter-factory</artifactId>
+            <version>0.1.0</version>
+        </dependency>
         <!-- Static analysis -->
         <!-- We are using Eclipse's annotations. If you're using IDEA, update 
             your project settings to take these into account for in real time static 
@@ -286,6 +296,13 @@
             <groupId>com.github.apachezy</groupId>
             <artifactId>LangUtils</artifactId>
             <version>3.2.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Spigot NMS. Used for chunk deletion and pasting. -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>${spigot.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -339,7 +356,33 @@
                 <version>3.0.0-M5</version>
                 <configuration>
                     <argLine>
-                        --illegal-access=permit
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                        --add-opens java.base/java.math=ALL-UNNAMED
+                        --add-opens java.base/java.io=ALL-UNNAMED
+                        --add-opens java.base/java.util=ALL-UNNAMED
+                        --add-opens
+                        java.base/java.util.stream=ALL-UNNAMED
+                        --add-opens java.base/java.text=ALL-UNNAMED
+                        --add-opens
+                        java.base/java.util.regex=ALL-UNNAMED
+                        --add-opens
+                        java.base/java.nio.channels.spi=ALL-UNNAMED
+                        --add-opens java.base/sun.nio.ch=ALL-UNNAMED
+                        --add-opens java.base/java.net=ALL-UNNAMED
+                        --add-opens
+                        java.base/java.util.concurrent=ALL-UNNAMED
+                        --add-opens java.base/sun.nio.fs=ALL-UNNAMED
+                        --add-opens java.base/sun.nio.cs=ALL-UNNAMED
+                        --add-opens java.base/java.nio.file=ALL-UNNAMED
+                        --add-opens
+                        java.base/java.nio.charset=ALL-UNNAMED
+                        --add-opens
+                        java.base/java.lang.reflect=ALL-UNNAMED
+                        --add-opens
+                        java.logging/java.util.logging=ALL-UNNAMED
+                        --add-opens java.base/java.lang.ref=ALL-UNNAMED
+                        --add-opens java.base/java.util.jar=ALL-UNNAMED
+                        --add-opens java.base/java.util.zip=ALL-UNNAMED
                     </argLine>
                 </configuration>
             </plugin>
@@ -347,9 +390,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
-                <configuration>
-                    <outputDirectory>C:\Users\EnTIv\Desktop\minecraft\server\paper-1.17\plugins</outputDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -361,12 +401,12 @@
                     <failOnError>false</failOnError>
                     <additionalJOption>-Xdoclint:none</additionalJOption>
                     <!-- To compile with Java 11, this tag may be required -->
-                    <!-- <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable> -->
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>

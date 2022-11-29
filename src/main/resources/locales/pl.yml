@@ -1369,7 +1369,7 @@ management:
             &a działać poprawnie, należy spodziewać się
             &6&l błędów lub problemów specyficznych
             &6&l dla platformy&a.
-          INCOMPATIBLE: |+
+          INCOMPATIBLE: |
             &a Serwer działa na &e [name] [version]&a .
 
             &a BentoBox aktualnie działa na
@@ -1409,7 +1409,7 @@ catalog:
       install-now: Zainstaluj teraz!
     empty-here:
       name: '&b Trochę tu pusto...'
-      description: |+
+      description: |
         &c BentoBox nie mógł połączyć się z GitHubem.
 
         &a Pozwól BentoBoxowi połączyć się z GitHubem
@@ -1424,7 +1424,7 @@ panel:
         &a Commity: &b [commits]
     empty-here:
       name: '&c Trochę tu pusto...'
-      description: |+
+      description: |
         &c BentoBox nie mógł zebrać współautorów
         &c tego dodatku.
 
@@ -1435,7 +1435,7 @@ successfully-loaded: |2
 
   &6   ____             _        ____
   &6  |  _ \           | |      |  _ \             &7 by &a tastybento &7 i &a Poslovitch
-  &6  | |_) | ___ _ __ | |_ ___ | |_) | _____  __  &7 2017 - 2020
+  &6  | |_) | ___ _ __ | |_ ___ | |_) | _____  __  &7 2017 - 2022
   &6  |  _ < / _ \ '_ \| __/ _ \|  _ < / _ \ \/ /  
   &6  | |_) |  __/ | | | || (_) | |_) | (_) >  <   &b v&e [version]
   &6  |____/ \___|_| |_|\__\___/|____/ \___/_/\_\  &8 Wczytano w &e [time]&8 ms.

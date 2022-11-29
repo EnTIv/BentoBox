@@ -42,10 +42,6 @@ public class IslandTeamKickCommand extends ConfirmableCommand {
             user.sendMessage("general.errors.no-team");
             return false;
         }
-        if (!user.getUniqueId().equals(getOwner(getWorld(), user))) {
-            user.sendMessage("general.errors.not-owner");
-            return false;
-        }
         // Check rank to use command
         Island island = getIslands().getIsland(getWorld(), user);
         int rank = Objects.requireNonNull(island).getRank(user);
@@ -72,6 +68,14 @@ public class IslandTeamKickCommand extends ConfirmableCommand {
             user.sendMessage("general.errors.not-in-team");
             return false;
         }
+
+        int targetRank = Objects.requireNonNull(island).getRank(targetUUID);
+        if (rank <= targetRank) {
+            user.sendMessage("commands.island.team.kick.cannot-kick-rank", 
+                TextVariables.NAME, getPlayers().getName(targetUUID));
+            return false;
+        }
+        
         if (!getSettings().isKickConfirmation()) {
             kick(user, targetUUID);
             return true;
@@ -83,7 +87,7 @@ public class IslandTeamKickCommand extends ConfirmableCommand {
 
     private void kick(User user, UUID targetUUID) {
         User target = User.getInstance(targetUUID);
-        Island oldIsland = getIslands().getIsland(getWorld(), targetUUID);
+        Island oldIsland = Objects.requireNonNull(getIslands().getIsland(getWorld(), targetUUID)); // Should never be null because of checks above
         // Fire event
         IslandBaseEvent event = TeamEvent.builder()
                 .island(oldIsland)
@@ -93,7 +97,9 @@ public class IslandTeamKickCommand extends ConfirmableCommand {
         if (event.isCancelled()) {
             return;
         }
-        target.sendMessage("commands.island.team.kick.owner-kicked", TextVariables.GAMEMODE, getAddon().getDescription().getName());
+        target.sendMessage("commands.island.team.kick.player-kicked", 
+            TextVariables.GAMEMODE, getAddon().getDescription().getName(),
+            TextVariables.NAME, user.getName());
 
         getIslands().removePlayer(getWorld(), targetUUID);
         // Clean the target player

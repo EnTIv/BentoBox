@@ -304,6 +304,16 @@ public final class Flags {
             .clickHandler(new CycleClick("LOCK", RanksManager.VISITOR_RANK, RanksManager.MEMBER_RANK))
             .mode(Flag.Mode.TOP_ROW).build();
 
+    /**
+     * This flag allows choosing which island members can change island settings values.
+     *
+     * @since 1.20.0
+     */
+    public static final Flag CHANGE_SETTINGS = new Flag.Builder("CHANGE_SETTINGS", Material.CRAFTING_TABLE).defaultSetting(true)
+        .defaultRank(RanksManager.OWNER_RANK)
+        .clickHandler(new CycleClick("CHANGE_SETTINGS", RanksManager.MEMBER_RANK, RanksManager.OWNER_RANK))
+        .mode(Flag.Mode.TOP_ROW).build();
+
     /*
      * Settings flags (not protection flags)
      */
@@ -393,11 +403,28 @@ public final class Flags {
             .mode(Flag.Mode.ADVANCED).build();
 
     /**
+     * If {@code false}, prevents Block Explode from breaking blocks and damaging nearby entities.
+     * @since 1.19.1
+     * @see TNTListener
+     */
+    public static final Flag BLOCK_EXPLODE_DAMAGE = new Flag.Builder("BLOCK_EXPLODE_DAMAGE", Material.TNT_MINECART).type(Type.SETTING)
+            .mode(Flag.Mode.ADVANCED).build();
+
+    /**
      * If {@code false}, prevents TNT from breaking blocks and damaging nearby entities outside of island boundaries.
      * @since 1.15.3
      * @see TNTListener
      */
     public static final Flag WORLD_TNT_DAMAGE = new Flag.Builder("WORLD_TNT_DAMAGE", Material.TNT)
+            .type(Type.WORLD_SETTING)
+            .build();
+
+    /**
+     * If {@code false}, prevents Block Explode from breaking blocks and damaging nearby entities outside of island boundaries.
+     * @since 1.19.1
+     * @see TNTListener
+     */
+    public static final Flag WORLD_BLOCK_EXPLODE_DAMAGE = new Flag.Builder("WORLD_BLOCK_EXPLODE_DAMAGE", Material.TNT_MINECART)
             .type(Type.WORLD_SETTING)
             .build();
 

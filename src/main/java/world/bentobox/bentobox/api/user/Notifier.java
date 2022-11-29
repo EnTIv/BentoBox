@@ -3,6 +3,8 @@ package world.bentobox.bentobox.api.user;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -26,7 +28,7 @@ public class Notifier {
             .build(
                     new CacheLoader<>() {
                         @Override
-                        public Notification load(User user) {
+                        public Notification load(@NonNull User user) {
                             return new Notification(null, 0);
                         }
                     }

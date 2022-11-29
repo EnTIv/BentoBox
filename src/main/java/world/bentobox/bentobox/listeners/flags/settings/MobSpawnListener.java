@@ -25,13 +25,22 @@ public class MobSpawnListener extends FlagListener {
      * Prevents mobs spawning naturally
      *
      * @param e - event
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onMobSpawnEvent(CreatureSpawnEvent e) {
+        onMobSpawn(e);
+    }
+    /**
+     * Prevents mobs spawning naturally
+     *
+     * @param e - event
      * @return true if cancelled
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public boolean onMobSpawn(CreatureSpawnEvent e) {
+    void onMobSpawn(CreatureSpawnEvent e) {
         // If not in the right world, or spawning is not natural return
         if (!getIWM().inWorld(e.getEntity().getLocation())) {
-            return false;
+            return;
         }
         switch (e.getSpawnReason()) {
         // Natural
@@ -47,20 +56,20 @@ public class MobSpawnListener extends FlagListener {
         case RAID:
         case REINFORCEMENTS:
         case SILVERFISH_BLOCK:
-        //case SLIME_SPLIT: messes with slimes from spawners, slime must have previously existed to create another
+            //case SLIME_SPLIT: messes with slimes from spawners, slime must have previously existed to create another
         case TRAP:
         case VILLAGE_DEFENSE:
         case VILLAGE_INVASION:
             boolean cancelNatural = shouldCancel(e.getEntity(), e.getLocation(), Flags.ANIMAL_NATURAL_SPAWN, Flags.MONSTER_NATURAL_SPAWN);
             e.setCancelled(cancelNatural);
-            return cancelNatural;
+            return;
             // Spawners
         case SPAWNER:
             boolean cancelSpawners = shouldCancel(e.getEntity(), e.getLocation(), Flags.ANIMAL_SPAWNERS_SPAWN, Flags.MONSTER_SPAWNERS_SPAWN);
             e.setCancelled(cancelSpawners);
-            return cancelSpawners;
+            return;
         default:
-            return false;
+            return;
         }
     }
 

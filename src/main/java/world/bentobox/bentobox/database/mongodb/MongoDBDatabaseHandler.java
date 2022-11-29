@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.mongodb.MongoClientException;
@@ -125,7 +126,7 @@ public class MongoDBDatabaseHandler<T> extends AbstractJSONDatabaseHandler<T> {
     }
 
     @Override
-    public T loadObject(String uniqueId) {
+    public T loadObject(@NonNull String uniqueId) {
         Document doc = collection.find(new Document(MONGO_ID, uniqueId)).limit(1).first();
         Gson gson = getGson();
         String json = JSON.serialize(doc).replaceFirst(MONGO_ID, UNIQUEID);

@@ -3,6 +3,7 @@ package world.bentobox.bentobox.managers;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -97,8 +98,13 @@ public class AddonsManager {
         plugin.log("Registering " + parent.getDescription().getName());
 
         // Get description in the addon.yml file
+        InputStream resource = parent.getResource("addon.yml");
+        if (resource == null) {
+            plugin.logError("Failed to register addon: no addon.yml found");
+            return;
+        }
         // Open a reader to the jar
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(parent.getResource("addon.yml")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource))) {
             setAddonFile(parent, addon);
             // Grab the description in the addon.yml file
             YamlConfiguration data = new YamlConfiguration();
@@ -266,7 +272,11 @@ public class AddonsManager {
     }
 
     void registerPermission(ConfigurationSection perms, String perm) throws InvalidAddonDescriptionException {
-        PermissionDefault pd = PermissionDefault.getByName(perms.getString(perm + DEFAULT));
+        String name = perms.getString(perm + DEFAULT);
+        if (name == null) {
+            throw new InvalidAddonDescriptionException("Permission default is invalid in addon.yml: " + perm + DEFAULT);
+        }
+        PermissionDefault pd = PermissionDefault.getByName(name);
         if (pd == null) {
             throw new InvalidAddonDescriptionException("Permission default is invalid in addon.yml: " + perm + DEFAULT);
         }
@@ -503,7 +513,7 @@ public class AddonsManager {
     @Nullable
     public Class<?> getClassByName(@NonNull final String name) {
         try {
-            return classes.getOrDefault(name, loaders.values().stream().map(l -> l.findClass(name, false)).filter(Objects::nonNull).findFirst().orElse(null));
+            return classes.getOrDefault(name, loaders.values().stream().filter(Objects::nonNull).map(l -> l.findClass(name, false)).filter(Objects::nonNull).findFirst().orElse(null));
         } catch (Exception ignored) {
             // Ignored.
         }
@@ -656,7 +666,28 @@ public class AddonsManager {
      * @since 1.8.0
      */
     public void allLoaded() {
-        addons.forEach(Addon::allLoaded);
+        this.getEnabledAddons().forEach(this::allLoaded);
     }
 
+
+    /**
+     * This method calls Addon#allLoaded in safe manner. If for some reason addon crashes on Addon#allLoaded, then
+     * it will disable itself without harming other addons.
+     * @param addon Addon that should trigger Addon#allLoaded method.
+     */
+    private void allLoaded(@NonNull Addon addon) {
+        try {
+            addon.allLoaded();
+        } catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError e) {
+            // Looks like the addon is incompatible, because it tries to refer to missing classes...
+            this.handleAddonIncompatibility(addon, e);
+            // Disable addon.
+            this.disable(addon);
+        } catch (Exception e) {
+            // Unhandled exception. We'll give a bit of debug here.
+            this.handleAddonError(addon, e);
+            // Disable addon.
+            this.disable(addon);
+        }
+    }
 }

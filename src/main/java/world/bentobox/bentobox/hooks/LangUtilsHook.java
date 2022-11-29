@@ -1,6 +1,9 @@
 package world.bentobox.bentobox.hooks;
 
-import com.meowj.langutils.lang.LanguageHelper;
+import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
+
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -18,14 +21,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.Nullable;
+
+import com.meowj.langutils.lang.LanguageHelper;
+
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.hooks.Hook;
 import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.util.Util;
-
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 /**
  * @author ApacheZy
@@ -207,7 +209,7 @@ public class LangUtilsHook extends Hook {
     public static String getEnchantDisplayName(Enchantment ench, int level, User user) {
         return hooked
                 ? LanguageHelper.getEnchantmentDisplayName(ench, level, getUserLocale(user))
-                : ench.getKey().getKey() + " " + level;
+                : Util.prettifyText(ench.getKey().getKey()) + " " + level;
     }
 
     /**
@@ -221,7 +223,7 @@ public class LangUtilsHook extends Hook {
     public static String getEnchantDisplayName(Entry<Enchantment, Integer> entry, User user) {
         return hooked
                 ? LanguageHelper.getEnchantmentDisplayName(entry, getUserLocale(user))
-                : entry.getKey().getKey().getKey() + " " + entry.getValue();
+                : Util.prettifyText(entry.getKey().getKey().getKey()) + " " + entry.getValue();
     }
 
     /**
@@ -234,7 +236,7 @@ public class LangUtilsHook extends Hook {
     public static String getEnchantName(Enchantment enchant, User user) {
         return hooked
                 ? LanguageHelper.getEnchantmentName(enchant, getUserLocale(user))
-                : enchant.getKey().getKey();
+                : Util.prettifyText(enchant.getKey().getKey());
     }
 
     /**

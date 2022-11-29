@@ -19,6 +19,7 @@ import world.bentobox.bentobox.util.teleport.SafeSpotTeleport;
 
 public class AdminTeleportCommand extends CompositeCommand {
 
+    private static final String NOT_SAFE = "general.errors.no-safe-location-found";
     private @Nullable UUID targetUUID;
     private @Nullable User userToTeleport;
 
@@ -86,20 +87,23 @@ public class AdminTeleportCommand extends CompositeCommand {
         } else if (getLabel().equals("tpend")) {
             world = getPlugin().getIWM().getEndWorld(getWorld());
         }
+        if (world == null) {
+            user.sendMessage(NOT_SAFE);
+            return false;
+        }
         Location warpSpot = getSpot(world);
-        if (world == null || warpSpot == null) {
-            user.sendMessage("general.errors.no-safe-location-found");
+        if (warpSpot == null) {
+            user.sendMessage(NOT_SAFE);
             return false;
         }
 
         // Otherwise, ask the admin to go to a safe spot
         String failureMessage = user.getTranslation("commands.admin.tp.manual", "[location]", warpSpot.getBlockX() + " " + warpSpot.getBlockY() + " "
                 + warpSpot.getBlockZ());
-
-        Player player = user.getPlayer();
+        // Set the player
+        Player player = args.size() == 2 ? userToTeleport.getPlayer() : user.getPlayer();
         if (args.size() == 2) {
-            player = userToTeleport.getPlayer();
-            failureMessage = userToTeleport.getTranslation("general.errors.no-safe-location-found");
+            failureMessage = userToTeleport.getTranslation(NOT_SAFE);
         }
 
         // Teleport
@@ -107,6 +111,7 @@ public class AdminTeleportCommand extends CompositeCommand {
         .entity(player)
         .location(warpSpot)
         .failureMessage(failureMessage)
+        .thenRun(() -> user.sendMessage("general.success"))
         .build();
         return true;
     }
@@ -118,7 +123,7 @@ public class AdminTeleportCommand extends CompositeCommand {
             return island.getSpawnPoint(world.getEnvironment());
         }
         // Return the default island protection center
-        return getIslands().getIslandLocation(getWorld(), targetUUID).toVector().toLocation(world);
+        return island.getProtectionCenter().toVector().toLocation(world);
     }
 
     @Override

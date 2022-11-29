@@ -30,6 +30,7 @@ import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.managers.IslandWorldManager;
 import world.bentobox.bentobox.managers.IslandsManager;
 import world.bentobox.bentobox.managers.PlayersManager;
+import world.bentobox.bentobox.managers.RanksManager;
 import world.bentobox.bentobox.util.Util;
 
 /**
@@ -52,6 +53,12 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
      * True if command is a configurable rank
      */
     private boolean configurableRankCommand = false;
+
+    /**
+     * Make default command rank as owner rank.
+     * @since 1.20.0
+     */
+    private int defaultCommandRank = RanksManager.OWNER_RANK;
 
     /**
      * True if command is hidden from help and tab complete
@@ -218,7 +225,7 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
      * subcommands until it finds the right object and then runs execute on it.
      */
     @Override
-    public boolean execute(CommandSender sender, String label, String[] args) {
+    public boolean execute(@NonNull CommandSender sender, @NonNull String label, String[] args) {
         // Get the User instance for this sender
         User user = User.getInstance(sender);
         // Fire an event to see if this command should be cancelled
@@ -352,7 +359,7 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
     }
 
     @Override
-    public BentoBox getPlugin() {
+    public @NonNull BentoBox getPlugin() {
         return plugin;
     }
 
@@ -422,7 +429,7 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
     }
 
     @Override
-    public String getUsage() {
+    public @NonNull String getUsage() {
         return "/" + usage;
     }
 
@@ -476,9 +483,12 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
      * Convenience method to check if a user is a player
      * @param user - the User
      * @return true if sender is a player
+     * @deprecated use {@link User#isPlayer()}
+     * @forRemove 1.18.0
      */
+    @Deprecated
     protected boolean isPlayer(User user) {
-        return user.getPlayer() != null;
+        return user.isPlayer();
     }
 
     /**
@@ -521,7 +531,7 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
      * @return The instance of this {@link Command}.
      */
     @Override
-    public Command setDescription(String description) {
+    public @NonNull Command setDescription(@NonNull String description) {
         super.setDescription(description);
         return this;
     }
@@ -575,7 +585,7 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
      * This creates the full linking chain of commands
      */
     @Override
-    public Command setUsage(String usage) {
+    public @NonNull Command setUsage(@NonNull String usage) {
         // Go up the chain
         CompositeCommand parentCommand = getParent();
         StringBuilder u = new StringBuilder().append(getLabel()).append(" ").append(usage);
@@ -590,7 +600,7 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
 
     @Override
     @NonNull
-    public List<String> tabComplete(final CommandSender sender, final String alias, final String[] args) {
+    public List<String> tabComplete(final @NonNull CommandSender sender, final @NonNull String alias, final String[] args) {
         List<String> options = new ArrayList<>();
         // Get command object based on args entered so far
         CompositeCommand command = getCommandFromArgs(args);
@@ -779,6 +789,26 @@ public abstract class CompositeCommand extends Command implements PluginIdentifi
      */
     public void setConfigurableRankCommand() {
         this.configurableRankCommand = true;
+    }
+
+    /**
+     * Sets default command rank.
+     *
+     * @param rank the rank
+     * @since 1.20.0
+     */
+    public void setDefaultCommandRank(int rank) {
+        this.defaultCommandRank = rank;
+    }
+
+    /**
+     * Gets default command rank.
+     *
+     * @return the default command rank
+     * @since 1.20.0
+     */
+    public int getDefaultCommandRank() {
+        return this.defaultCommandRank;
     }
 
     /**

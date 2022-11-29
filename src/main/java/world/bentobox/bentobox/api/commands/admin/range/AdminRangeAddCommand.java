@@ -1,6 +1,7 @@
 package world.bentobox.bentobox.api.commands.admin.range;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -52,10 +53,10 @@ public class AdminRangeAddCommand extends CompositeCommand {
             return false;
         }
 
-        Island island = getIslands().getIsland(getWorld(), targetUUID);
+        Island island = Objects.requireNonNull(getIslands().getIsland(getWorld(), targetUUID));
         int newRange = island.getProtectionRange() + Integer.parseInt(args.get(1));
 
-        if (newRange > island.getRange() * 2) {
+        if (newRange > island.getRange()) {
             user.sendMessage("commands.admin.range.invalid-value.too-high", TextVariables.NUMBER, String.valueOf(island.getRange()));
             return false;
         } else if (newRange == island.getProtectionRange()) {

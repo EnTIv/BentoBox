@@ -32,7 +32,7 @@ public class IslandRespawnListener extends FlagListener {
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerDeath(PlayerDeathEvent e) {
         World world = Util.getWorld(e.getEntity().getWorld());
-        if (!getIWM().inWorld(world)) {
+        if (world == null || !getIWM().inWorld(world)) {
             return; // not in the island world
         }
         if (!Flags.ISLAND_RESPAWN.isSetForWorld(world)) {
@@ -60,10 +60,12 @@ public class IslandRespawnListener extends FlagListener {
         if (world == null) {
             return; // world no longer available
         }
-
-        final Location respawnLocation = getIslands().getSafeHomeLocation(Util.getWorld(world), User.getInstance(e.getPlayer().getUniqueId()), "");
-        if (respawnLocation != null) {
-            e.setRespawnLocation(respawnLocation);
+        World w = Util.getWorld(world);
+        if (w != null) {
+            final Location respawnLocation = getIslands().getSafeHomeLocation(w, User.getInstance(e.getPlayer().getUniqueId()), "");
+            if (respawnLocation != null) {
+                e.setRespawnLocation(respawnLocation);
+            }
         }
         // Run respawn commands, if any
         Util.runCommands(User.getInstance(e.getPlayer()), getIWM().getOnRespawnCommands(world), "respawn");

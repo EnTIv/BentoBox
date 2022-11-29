@@ -37,6 +37,7 @@ general:
     wrong-world: "&c You are not in the right world to do that!"
     you-must-wait: "&c You must wait [number]s before you can do that command again."
     must-be-positive-number: "&c [number] is not a valid positive number."
+    not-on-island: "&c You are not on island!"
   worlds:
     overworld: "Overworld"
     nether: "Nether"
@@ -75,7 +76,7 @@ commands:
         parameters: "<player> <resets>"
         success: "&a Successfully removed &b [number] &a resets to &b [name], decreasing the total to &b [total]&a  resets."
     purge:
-      parameters: "[days]" 
+      parameters: "[days]"
       description: "purge islands abandoned for more than [days]"
       days-one-or-more: "Must be at least 1 day or more"
       purgable-islands: "&a Found &b [number] &a purgable islands."
@@ -99,7 +100,7 @@ commands:
       status:
         description: "displays the status of the purge"
         status: "&b [purged] &a islands purged out of &b [purgeable] &7(&b[percentage] %&7)&a."
-        
+
     team:
       add:
         parameters: "<owner> <player>"
@@ -199,6 +200,8 @@ commands:
       island-coords: "Island coordinates: [xz1] to [xz2]"
       islands-in-trash: "&d Player has islands in trash."
       protection-range: "Protection range: [range]"
+      protection-range-bonus-title: "&b Includes these bonues:"
+      protection-range-bonus: "Bonus: [number]"
       purge-protected: "Island is purge protected"
       max-protection-range: "Largest historical protection range: [range]"
       protection-coords: "Protection coordinates: [xz1] to [xz2]"
@@ -391,6 +394,10 @@ commands:
       description: "deletes a player's island"
       cannot-delete-owner: "&c All island members have to be kicked from the island before deleting it."
       deleted-island: "&a Island at &e [xyz] &a has been successfully deleted."
+    deletehomes:
+      parameters: "<player>"
+      description: "deletes all named homes from an island"
+      warning: "&c All named homes will be deleted from the island!"
     why:
       parameters: "<player>"
       description: "toggle console protection debug reporting"
@@ -454,7 +461,7 @@ commands:
       addons: "[prefix_bentobox]&6 Migrating addons"
       class: "[prefix_bentobox]&6 Migrating [description]"
       migrated: "[prefix_bentobox]&a Migrated"
-      
+
   confirmation:
     confirm: "&c Type command again within &b [seconds]s&c  to confirm."
     previous-request-cancelled: "&6 Previous confirmation request cancelled."
@@ -564,7 +571,7 @@ commands:
           days: "days"
           hours: "hours"
           minutes: "minutes"
-        header: |+
+        header: |
           &f --- &a Team details &f ---
           &a Members: &b [total]&7 /&b [max]
           &a Online members: &b [online]
@@ -645,8 +652,9 @@ commands:
       kick:
         description: "remove a member from your island"
         parameters: "<player>"
-        owner-kicked: "&c The owner kicked you from the island in [gamemode]!"
+        player-kicked: "&c The [name] kicked you from the island in [gamemode]!"
         cannot-kick: "&c You cannot kick yourself!"
+        cannot-kick-rank: "&c Your rank does not allow to kick [name]!"
         success: "&b [name] &a has been kicked from your island."
       demote:
         description: "demote a player on your island down a rank"
@@ -719,7 +727,7 @@ ranks:
   banned: "Banned"
   admin: "Admin"
   mod: "Mod"
-  
+
 protection:
   command-is-banned: "Command is banned for visitors"
   flags:
@@ -729,19 +737,19 @@ protection:
     ANIMAL_SPAWNERS_SPAWN:
       description: "Toggle animal spawning with spawners"
       name: "Animal spawners"
-    ANVIL: 
+    ANVIL:
       description: "Toggle interaction"
       name: "Anvils"
       hint: "Anvil use disabled"
-    ARMOR_STAND: 
+    ARMOR_STAND:
       description: "Toggle interaction"
       name: "Armor stands"
       hint: "Armor stand use disabled"
-    BEACON: 
+    BEACON:
       description: "Toggle interaction"
       name: "Beacons"
       hint: "Beacon use disabled"
-    BED: 
+    BED:
       description: "Toggle interaction"
       name: "Beds"
       hint: "Bed use disabled"
@@ -751,7 +759,7 @@ protection:
         Toggle placing, breaking and
         entering into boats.
       hint: "No boat interaction allowed"
-    BREAK_BLOCKS: 
+    BREAK_BLOCKS:
       description: "Toggle breaking"
       name: "Break blocks"
       hint: "Block breaking disabled"
@@ -767,19 +775,19 @@ protection:
         Overrides the Break Blocks flag.
       name: "Break hoppers"
       hint: "Hoppers breaking disabled"
-    BREEDING: 
+    BREEDING:
       description: "Toggle breeding"
       name: "Breed animals"
       hint: "Animal breeding protected"
-    BREWING: 
+    BREWING:
       description: "Toggle interaction"
       name: "Brewing stands"
       hint: "Brewing disabled"
-    BUCKET: 
+    BUCKET:
       description: "Toggle interaction"
       name: "Buckets"
       hint: "Bucket use disabled"
-    BUTTON: 
+    BUTTON:
       description: "Toggle button use"
       name: "Buttons"
       hint: "Button use disabled"
@@ -811,6 +819,12 @@ protection:
       name: "Barrels"
       description: "Toggle barrel interaction"
       hint: "Barrel access disabled"
+    BLOCK_EXPLODE_DAMAGE:
+      description: |-
+        &a Allow Bed & Respawn Anchors
+        &a to break blocks and damage
+        &a entities.
+      name: "Block explode damage"
     COMPOSTER:
       name: "Composters"
       description: "Toggle composter interaction"
@@ -846,7 +860,7 @@ protection:
     CHEST_DAMAGE:
       description: "Toggle chest damage from explosions"
       name: "Chest Damage"
-    CHORUS_FRUIT: 
+    CHORUS_FRUIT:
       description: "Toggle teleportation"
       name: "Chorus fruits"
       hint: "Chorus fruit teleporting disabled"
@@ -863,13 +877,13 @@ protection:
           &a to obtain dirt
       name: "Coarse dirt tilling"
       hint: "No coarse dirt tilling"
-    COLLECT_LAVA: 
+    COLLECT_LAVA:
       description: |-
           &a Toggle collecting lava
           &a (override Buckets)
       name: "Collect lava"
       hint: "No lava collection"
-    COLLECT_WATER: 
+    COLLECT_WATER:
       description: |-
           &a Toggle collecting water
           &a (override Buckets)
@@ -878,7 +892,7 @@ protection:
     COMMAND_RANKS:
       name: "&e Command Ranks"
       description: "&a Configure command ranks"
-    CRAFTING: 
+    CRAFTING:
       description: "Toggle use"
       name: "Workbenches"
       hint: "Workbench access disabled"
@@ -894,11 +908,11 @@ protection:
         &a by island visitor.
       name: "Creeper griefing protection"
       hint: "Creeper griefing disabled"
-    CROP_TRAMPLE: 
+    CROP_TRAMPLE:
       description: "Toggle crop trampling"
       name: "Trample crops"
       hint: "Crop trampling disabled"
-    DOOR: 
+    DOOR:
       description: "Toggle door usage"
       name: "Use doors"
       hint: "Door interaction disabled"
@@ -914,7 +928,7 @@ protection:
       description: "Prevent dye use"
       name: "Dye use"
       hint: "Dyeing disabled"
-    EGGS: 
+    EGGS:
       description: "Toggle egg throwing"
       name: "Egg throwing"
       hint: "Egg throwing disabled"
@@ -926,22 +940,22 @@ protection:
       description: "Toggle use/crafting"
       name: "Ender Chests"
       hint: "Ender chests are disabled in this world"
-    ENDERMAN_DEATH_DROP: 
+    ENDERMAN_DEATH_DROP:
       description: |-
          &a Endermen will drop
          &a any block they are
          &a holding if killed.
       name: "Enderman Death Drop"
-    ENDERMAN_GRIEFING: 
+    ENDERMAN_GRIEFING:
       description: |-
          &a Endermen can remove
          &a blocks from islands
       name: "Enderman griefing"
-    ENDER_PEARL: 
+    ENDER_PEARL:
       description: "Toggle use"
       name: "EnderPearls"
       hint: "Enderpearl use disabled"
-    ENTER_EXIT_MESSAGES: 
+    ENTER_EXIT_MESSAGES:
       description: "Display entry and exit messages"
       island: "[name]'s island"
       name: "Enter/Exit messages"
@@ -958,7 +972,7 @@ protection:
       description: |-
         &a Toggle whether fire can burn
         &a blocks or not.
-    FIRE_EXTINGUISH: 
+    FIRE_EXTINGUISH:
       description: "Toggle extinguishing fires"
       name: "Fire extinguish"
       hint: "Extinguishing fire disabled"
@@ -983,15 +997,15 @@ protection:
         &a campfires using flint and steel
         &a or fire charges.
       hint: "Flint and steel and fire charges disabled"
-    FURNACE: 
+    FURNACE:
       description: "Toggle use"
       name: "Furnace"
       hint: "Furnace use disabled"
-    GATE: 
+    GATE:
       description: "Toggle use"
       name: "Gates"
       hint: "Gate use disabled"
-    GEO_LIMIT_MOBS: 
+    GEO_LIMIT_MOBS:
       description: |-
          &a Remove mobs that go
          &a outside protected
@@ -1002,15 +1016,15 @@ protection:
         &a Toggle hive harvesting.
       name: "Hive harvesting"
       hint: "Harvesting disabled"
-    HURT_ANIMALS: 
+    HURT_ANIMALS:
       description: "Toggle hurting"
       name: "Hurt animals"
       hint: "Animal hurting disabled"
-    HURT_MONSTERS: 
+    HURT_MONSTERS:
       description: "Toggle hurting"
       name: "Hurt monsters"
       hint: "Monster hurting disabled"
-    HURT_VILLAGERS: 
+    HURT_VILLAGERS:
       description: "Toggle hurting"
       name: "Hurt villagers"
       hint: "Villager hurting disabled"
@@ -1025,7 +1039,7 @@ protection:
           &a Mobs can damage
           &a item frames
       name: "Item Frame Damage"
-    INVINCIBLE_VISITORS: 
+    INVINCIBLE_VISITORS:
       description: |-
           &a Configure invincible visitor
           &a settings.
@@ -1036,11 +1050,11 @@ protection:
         &a Players respawn
         &a on island
       name: "Island respawn"
-    ITEM_DROP: 
+    ITEM_DROP:
       description: "Toggle dropping"
       name: "Item drop"
       hint: "Item dropping disabled"
-    ITEM_PICKUP: 
+    ITEM_PICKUP:
       description: "Toggle pickup"
       name: "Item pickup"
       hint: "Item pickup disabled"
@@ -1051,7 +1065,7 @@ protection:
     LEAF_DECAY:
       name: "Leaf decay"
       description: "Allow leaves to naturally decay"
-    LEASH: 
+    LEASH:
       description: "Toggle use"
       name: "Leash use"
     LECTERN:
@@ -1067,7 +1081,7 @@ protection:
       description: "Toggle use"
       name: "Lever use"
       hint: "Lever use disabled"
-    LIMIT_MOBS: 
+    LIMIT_MOBS:
       description: |-
          &a Limit entities from
          &a spawning in this game
@@ -1088,9 +1102,14 @@ protection:
         &c They will also not spread horizontally if
         &c they are placed outside an island's
         &c protection range.
-    LOCK: 
+    LOCK:
       description: "Toggle lock"
       name: "Lock island"
+    CHANGE_SETTINGS:
+      name: "Change Settings"
+      description: |-
+        &a Allow to switch which member
+        &a role can change island settings.
     MILKING: 
       description: "Toggle cow milking"
       name: "Milking"
@@ -1316,6 +1335,12 @@ protection:
       description: |-
         &a If active, withers can
         &a damage blocks and players
+    WORLD_BLOCK_EXPLODE_DAMAGE:
+      description: |-
+        &a Allow Bed & Respawn Anchors
+        &a to break blocks and damage
+        &a entities outside of island limits.
+      name: "World block explode damage"
     WORLD_TNT_DAMAGE:
       description: |-
         &a Allow TNT and TNT minecarts
@@ -1343,7 +1368,7 @@ protection:
       click-to-switch: "&e Click &7 to switch to the &r [next]&r &7 ."
     reset-to-default:
       name: "&c Reset to default"
-      description: |+
+      description: |
         &a Resets &c &l ALL &r &a the settings to their
         &a default value.
     PROTECTION:
@@ -1411,7 +1436,7 @@ management:
           description: "&a Opens the Admin Blueprint menu."
         gamemode:
           name: "&f [name]"
-          description: |+
+          description: |
             &a Islands: &b [islands]
       addons:
         name: "&6 Addons"
@@ -1437,7 +1462,7 @@ management:
       state:
         name: "&6 Compatibility"
         description:
-          COMPATIBLE: |+
+          COMPATIBLE: |
             &a Running &e [name] [version]&a .
 
             &a BentoBox is currently running on a
@@ -1446,7 +1471,7 @@ management:
 
             &a Its features are fully designed to
             &a run in this environment.
-          SUPPORTED: |+
+          SUPPORTED: |
             &a Running &e [name] [version]&a .
 
             &a BentoBox is currently running on a
@@ -1455,7 +1480,7 @@ management:
 
             &a Most of its features will run smoothly
             &a in this environment.
-          NOT_SUPPORTED: |+
+          NOT_SUPPORTED: |
             &a Running &e [name] [version]&a .
 
             &a BentoBox is currently running on a
@@ -1465,7 +1490,7 @@ management:
             &a While most of its features will run
             &a correctly, &6 platform-specific bugs or
             &6 issues are to be expected&a .
-          INCOMPATIBLE: |+
+          INCOMPATIBLE: |
             &a Running &e [name] [version]&a .
 
             &a BentoBox is currently running on an
@@ -1484,16 +1509,16 @@ catalog:
     views:
       gamemodes:
         name: "&6 Gamemodes"
-        description: |+
+        description: |
           &e Click &a to browse through the
           &a available official Gamemodes.
       addons:
         name: "&6 Addons"
-        description: |+
+        description: |
           &e Click &a to browse through the
           &a available official Addons.
     icon:
-      description-template: |+
+      description-template: |
         &8 [topic]
         &a [install]
 
@@ -1506,7 +1531,7 @@ catalog:
 
     empty-here:
       name: "&b This looks empty here..."
-      description: |+
+      description: |
         &c BentoBox could not connect to GitHub.
 
         &a Allow BentoBox to connect to GitHub in
@@ -1552,18 +1577,18 @@ panel:
         &a Commits: &b [commits]
     empty-here:
       name: "&c This looks empty here..."
-      description: |+
+      description: |
         &c BentoBox could not gather the Contributors
         &c for this Addon.
 
         &a Allow BentoBox to connect to GitHub in
         &a the configuration or try again later.
 
-successfully-loaded: |
+successfully-loaded: |2
 
   &6   ____             _        ____
   &6  |  _ \           | |      |  _ \             &7 by &a tastybento &7 and &a Poslovitch
-  &6  | |_) | ___ _ __ | |_ ___ | |_) | _____  __  &7 2017 - 2020
+  &6  | |_) | ___ _ __ | |_ ___ | |_) | _____  __  &7 2017 - 2022
   &6  |  _ < / _ \ '_ \| __/ _ \|  _ < / _ \ \/ /
   &6  | |_) |  __/ | | | || (_) | |_) | (_) >  <   &b v&e [version]
   &6  |____/ \___|_| |_|\__\___/|____/ \___/_/\_\  &8 Loaded in &e [time]&8 ms.

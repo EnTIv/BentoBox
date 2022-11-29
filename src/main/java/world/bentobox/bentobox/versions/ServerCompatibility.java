@@ -75,8 +75,6 @@ public class ServerCompatibility {
         GLOWSTONE(Compatibility.INCOMPATIBLE),
         SPIGOT(Compatibility.COMPATIBLE),
         PAPER(Compatibility.SUPPORTED),
-        TUINITY(Compatibility.SUPPORTED),
-        AIRPLANE(Compatibility.SUPPORTED),
         PURPUR(Compatibility.SUPPORTED),
         TACOSPIGOT(Compatibility.NOT_SUPPORTED),
         AKARIN(Compatibility.NOT_SUPPORTED),
@@ -178,16 +176,28 @@ public class ServerCompatibility {
         /**
          * @since 1.16.0
          */
-        V1_16_5(Compatibility.INCOMPATIBLE),
+        V1_16_5(Compatibility.NOT_SUPPORTED),
 
         /**
          * @since 1.17.0
          */
-        V1_17(Compatibility.COMPATIBLE),
+        V1_17(Compatibility.NOT_SUPPORTED),
         /**
          * @since 1.17.1
          */
-        V1_17_1(Compatibility.COMPATIBLE)
+        V1_17_1(Compatibility.SUPPORTED),
+        /**
+         * @since 1.19.0
+         */
+        V1_18(Compatibility.COMPATIBLE),
+        /**
+         * @since 1.19.0
+         */
+        V1_18_1(Compatibility.COMPATIBLE),
+        /**
+         * @since 1.20.1
+         */
+        V1_18_2(Compatibility.COMPATIBLE),
         ;
 
         private final Compatibility compatibility;

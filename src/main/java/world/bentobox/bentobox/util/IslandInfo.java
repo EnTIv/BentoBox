@@ -2,12 +2,9 @@ package world.bentobox.bentobox.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 import org.eclipse.jdt.annotation.Nullable;
@@ -24,14 +21,16 @@ import world.bentobox.bentobox.managers.RanksManager;
  */
 public class IslandInfo {
 
-    private final BentoBox plugin;
+    private static final String XZ1 = "[xz1]";
+	private static final String RANGE = "[range]";
+	private final BentoBox plugin;
     private final Island island;
     private final @Nullable UUID owner;
     private final World world;
 
 
     /**
-     * @param plugin
+     * Get island Info
      * @param island Island to show info
      */
     public IslandInfo(Island island) {
@@ -47,11 +46,11 @@ public class IslandInfo {
      */
     public void showAdminInfo(User user) {
         user.sendMessage("commands.admin.info.title");
-        user.sendMessage("commands.admin.info.island-uuid", "[uuid]", island.getUniqueId());
+        user.sendMessage("commands.admin.info.island-uuid", TextVariables.UUID, island.getUniqueId());
         if (owner == null) {
             user.sendMessage("commands.admin.info.unowned");
         } else {
-            user.sendMessage("commands.admin.info.owner", "[owner]", plugin.getPlayers().getName(owner), "[uuid]", owner.toString());
+            user.sendMessage("commands.admin.info.owner", "[owner]", plugin.getPlayers().getName(owner), TextVariables.UUID, owner.toString());
 
             // Fixes #getLastPlayed() returning 0 when it is the owner's first connection.
             long lastPlayed = (Bukkit.getOfflinePlayer(owner).getLastPlayed() != 0) ?
@@ -60,25 +59,35 @@ public class IslandInfo {
             try {
                 String dateTimeFormat = plugin.getLocalesManager().get("commands.admin.info.last-login-date-time-format");
                 formattedDate = new SimpleDateFormat(dateTimeFormat).format(new Date(lastPlayed));
-            } catch (NullPointerException | IllegalArgumentException ignored) {
+            } catch (Exception ignored) {
                 formattedDate = new Date(lastPlayed).toString();
             }
             user.sendMessage("commands.admin.info.last-login","[date]", formattedDate);
 
-            user.sendMessage("commands.admin.info.deaths", "[number]", String.valueOf(plugin.getPlayers().getDeaths(world, owner)));
+            user.sendMessage("commands.admin.info.deaths", TextVariables.NUMBER, String.valueOf(plugin.getPlayers().getDeaths(world, owner)));
             String resets = String.valueOf(plugin.getPlayers().getResets(world, owner));
             String total = plugin.getIWM().getResetLimit(world) < 0 ? "Unlimited" : String.valueOf(plugin.getIWM().getResetLimit(world));
-            user.sendMessage("commands.admin.info.resets-left", "[number]", resets, "[total]", total);
+            user.sendMessage("commands.admin.info.resets-left", TextVariables.NUMBER, resets, "[total]", total);
             // Show team members
             showMembers(user);
         }
         Vector location = island.getProtectionCenter().toVector();
         user.sendMessage("commands.admin.info.island-protection-center", TextVariables.XYZ, Util.xyz(location));
         user.sendMessage("commands.admin.info.island-center", TextVariables.XYZ, Util.xyz(island.getCenter().toVector()));
-        user.sendMessage("commands.admin.info.island-coords", "[xz1]", Util.xyz(new Vector(island.getMinX(), 0, island.getMinZ())), "[xz2]", Util.xyz(new Vector(island.getMaxX(), 0, island.getMaxZ())));
-        user.sendMessage("commands.admin.info.protection-range", "[range]", String.valueOf(island.getProtectionRange()));
-        user.sendMessage("commands.admin.info.max-protection-range", "[range]", String.valueOf(island.getMaxEverProtectionRange()));
-        user.sendMessage("commands.admin.info.protection-coords", "[xz1]", Util.xyz(new Vector(island.getMinProtectedX(), 0, island.getMinProtectedZ())), "[xz2]", Util.xyz(new Vector(island.getMaxProtectedX(), 0, island.getMaxProtectedZ())));
+        user.sendMessage("commands.admin.info.island-coords", XZ1, Util.xyz(new Vector(island.getMinX(), 0, island.getMinZ())), "[xz2]", Util.xyz(new Vector(island.getMaxX(), 0, island.getMaxZ())));
+        user.sendMessage("commands.admin.info.protection-range", RANGE, String.valueOf(island.getProtectionRange()));
+        if (!island.getBonusRanges().isEmpty()) {
+            user.sendMessage("commands.admin.info.protection-range-bonus-title");
+        }
+        island.getBonusRanges().forEach(brb -> {
+            if (brb.getMessage().isBlank()) {
+                user.sendMessage("commands.admin.info.protection-range-bonus", TextVariables.NUMBER, String.valueOf(brb.getRange()));
+            } else {
+                user.sendMessage(brb.getMessage(), TextVariables.NUMBER, String.valueOf(brb.getRange()));
+            }
+        });
+        user.sendMessage("commands.admin.info.max-protection-range", RANGE, String.valueOf(island.getMaxEverProtectionRange()));
+        user.sendMessage("commands.admin.info.protection-coords", XZ1, Util.xyz(new Vector(island.getMinProtectedX(), 0, island.getMinProtectedZ())), "[xz2]", Util.xyz(new Vector(island.getMaxProtectedX() - 1, 0, island.getMaxProtectedZ() - 1)));
         if (island.isSpawn()) {
             user.sendMessage("commands.admin.info.is-spawn");
         }
@@ -102,20 +111,18 @@ public class IslandInfo {
         if (owner == null) {
             user.sendMessage("commands.admin.info.unowned");
         } else {
-            user.sendMessage("commands.admin.info.owner", "[owner]", plugin.getPlayers().getName(owner));
-            user.sendMessage("commands.admin.info.deaths", "[number]", String.valueOf(plugin.getPlayers().getDeaths(world, owner)));
+            user.sendMessage("commands.admin.info.owner", "[owner]", plugin.getPlayers().getName(owner), TextVariables.UUID, owner.toString());
+            user.sendMessage("commands.admin.info.deaths", TextVariables.NUMBER, String.valueOf(plugin.getPlayers().getDeaths(world, owner)));
             String resets = String.valueOf(plugin.getPlayers().getResets(world, owner));
             String total = plugin.getIWM().getResetLimit(world) < 0 ? "Unlimited" : String.valueOf(plugin.getIWM().getResetLimit(world));
-            user.sendMessage("commands.admin.info.resets-left", "[number]", resets, "[total]", total);
+            user.sendMessage("commands.admin.info.resets-left", TextVariables.NUMBER, resets, "[total]", total);
             // Show team members
-            user.sendMessage("commands.admin.info.resets-left", "[number]", resets, "[total]", total);
-
             showMembers(user);
         }
         Vector location = island.getProtectionCenter().toVector();
         user.sendMessage("commands.admin.info.island-center", TextVariables.XYZ, Util.xyz(location));
-        user.sendMessage("commands.admin.info.protection-range", "[range]", String.valueOf(island.getProtectionRange() * 2));
-        user.sendMessage("commands.admin.info.protection-coords", "[xz1]", Util.xyz(new Vector(island.getMinProtectedX(), 0, island.getMinProtectedZ())), "[xz2]", Util.xyz(new Vector(island.getMaxProtectedX(), 0, island.getMaxProtectedZ())));
+        user.sendMessage("commands.admin.info.protection-range", RANGE, String.valueOf(island.getProtectionRange()));
+        user.sendMessage("commands.admin.info.protection-coords", XZ1, Util.xyz(new Vector(island.getMinProtectedX(), 0, island.getMinProtectedZ())), "[xz2]", Util.xyz(new Vector(island.getMaxProtectedX() - 1, 0, island.getMaxProtectedZ() - 1)));
         if (island.isSpawn()) {
             user.sendMessage("commands.admin.info.is-spawn");
         }

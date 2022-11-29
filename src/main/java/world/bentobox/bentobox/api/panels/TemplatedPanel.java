@@ -7,10 +7,13 @@
 package world.bentobox.bentobox.api.panels;
 
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import java.util.*;
-import java.util.function.BiFunction;
 
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;
@@ -43,6 +46,8 @@ public class TemplatedPanel extends Panel
         this.typeIndex = new HashMap<>(builder.getObjectCreatorMap().size());
         this.typeSlotMap = new HashMap<>(builder.getObjectCreatorMap().size());
 
+        this.parameters = builder.getParameters().toArray(new String[0]);
+
         if (this.panelTemplate == null)
         {
             BentoBox.getInstance().logError("Cannot generate panel because template is not loaded.");
@@ -66,7 +71,7 @@ public class TemplatedPanel extends Panel
                 case DROPPER -> this.populateDropperPanel();
             };
 
-        super.makePanel(this.user.getTranslation(this.panelTemplate.title()),
+        super.makePanel(this.user.getTranslation(this.panelTemplate.title(), this.parameters),
             items,
             items.keySet().stream().max(Comparator.naturalOrder()).orElse(9),
             this.user,
@@ -97,7 +102,7 @@ public class TemplatedPanel extends Panel
                 {
                     String type = String.valueOf(record.dataMap().get("type"));
 
-                    int counter = this.typeSlotMap.computeIfAbsent(type, key -> 1);
+                    int counter = this.typeSlotMap.computeIfAbsent(type, key -> 0);
                     this.typeSlotMap.put(type, counter + 1);
                 }
             }
@@ -227,7 +232,7 @@ public class TemplatedPanel extends Panel
             {
                 String type = String.valueOf(record.dataMap().get("type"));
 
-                int counter = this.typeSlotMap.computeIfAbsent(type, key -> 1);
+                int counter = this.typeSlotMap.computeIfAbsent(type, key -> 0);
                 this.typeSlotMap.put(type, counter + 1);
             }
         }
@@ -290,7 +295,7 @@ public class TemplatedPanel extends Panel
                 {
                     String type = String.valueOf(record.dataMap().get("type"));
 
-                    int counter = this.typeSlotMap.computeIfAbsent(type, key -> 1);
+                    int counter = this.typeSlotMap.computeIfAbsent(type, key -> 0);
                     this.typeSlotMap.put(type, counter + 1);
                 }
             }
@@ -524,4 +529,10 @@ public class TemplatedPanel extends Panel
      * Stores the number of items with given type in whole panel.
      */
     private final Map<String, Integer> typeSlotMap;
+
+    /**
+     * Stores the parameters for panel title object.
+     * @since 1.20.0
+     */
+    private final String[] parameters;
 }
